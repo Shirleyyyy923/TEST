@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>马里奥爆金币乘法游戏 - 终极版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #5C94FC 0%, #5C94FC 60%, #D8A028 60%, #D8A028 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 背景元素 */
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            z-index: 1;
+            animation: cloudMove linear infinite;
+        }
+        
+        .brick {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="%23C83C29"/><rect x="0" y="0" width="40" height="5" fill="%23E84D3D"/><rect x="0" y="5" width="5" height="30" fill="%23E84D3D"/></svg>');
+            bottom: 15%;
+            left: 10%;
+            z-index: 2;
+        }
+        
+        .pipe {
+            position: absolute;
+            width: 80px;
+            height: 100px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="100"><rect width="80" height="100" fill="%2337A42A"/><rect x="0" y="0" width="80" height="20" fill="%234BC63C"/><rect x="0" y="20" width="10" height="80" fill="%234BC63C"/></svg>');
+            bottom: 15%;
+            right: 10%;
+            z-index: 2;
+        }
+
+        @keyframes cloudMove {
+            from { transform: translateX(-150px); }
+            to { transform: translateX(calc(100vw + 150px)); }
+        }
+        
+        .game-container {
+            width: 95%;
+            max-width: 500px;
+            height: 80vh;
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            z-index: 10;
+        }
+        
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 15%;
+            min-height: 80px;
+            background-color: #D8A028;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23D8A028"/><path d="M0,20 Q25,0 50,20 T100,20" fill="none" stroke="%23B58923" stroke-width="3"/></svg>');
+            background-size: 100px;
+            z-index: 5;
+        }
+        
+        .mario {
+            position: absolute;
+            bottom: 15%;
+            left: 25%;
+            width: 20%;
+            max-width: 80px;
+            height: 15%;
+            max-height: 100px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 100"><rect x="30" y="40" width="20" height="40" fill="%23E52521"/><rect x="20" y="60" width="40" height="20" fill="%2337A42A"/><circle cx="40" cy="30" r="20" fill="%23F7BD2F"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            z-index: 15;
+            transition: transform 0.1s;
+        }
+        
+        /* 不同马里奥皮肤 */
+        .mario-skin-1 {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 100"><rect x="30" y="40" width="20" height="40" fill="%233366FF"/><rect x="20" y="60" width="40" height="20" fill="%23FF33CC"/><circle cx="40" cy="30" r="20" fill="%23FF9933"/></svg>');
+        }
+        
+        .mario-skin-2 {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 100"><rect x="30" y="40" width="20" height="40" fill="%2333CC33"/><rect x="20" y="60" width="40" height="20" fill="%233333FF"/><circle cx="40" cy="30" r="20" fill="%23FF33FF"/></svg>');
+        }
+        
+        .mario-skin-3 {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 100"><rect x="30" y="40" width="20" height="40" fill="%23FF33CC"/><rect x="20" y="60" width="40" height="20" fill="%2333CCFF"/><circle cx="40" cy="30" r="20" fill="%23CCFF33"/></svg>');
+        }
+        
+        .question-box {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #F8F8F8;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            z-index: 20;
+        }
+        
+        .question {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .option {
+            padding: 12px;
+            font-size: 1.2rem;
+            background-color: #FF5252;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 0 3px 0 #C62828;
+            min-height: 50px;
+        }
+        
+        .option:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #C62828;
+        }
+        
+        .timer {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .coins-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            z-index: 20;
+        }
+        
+        .coin-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="%23FFD700"/><circle cx="10" cy="10" r="6" fill="%23FFEB3B"/></svg>');
+            background-size: contain;
+        }
+        
+        .shop-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: #FFC107;
+            border: none;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #FF9800;
+            transition: all 0.1s;
+            z-index: 20;
+        }
+        
+        .shop-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #FF9800;
+        }
+        
+        .shop {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            z-index: 30;
+            display: none;
+        }
+        
+        .shop-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .shop-items {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .shop-item {
+            background-color: #F5F5F5;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        
+        .shop-item:active {
+            transform: translateY(-2px);
+        }
+        
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .item-price {
+            color: #FF9800;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .close-shop {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .coin {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25"><circle cx="12.5" cy="12.5" r="10" fill="%23FFD700"/><circle cx="12.5" cy="12.5" r="7" fill="%23FFEB3B"/></svg>');
+            background-size: contain;
+            z-index: 15;
+            animation: coin-spin 1s linear infinite;
+        }
+        
+        @keyframes coin-spin {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+            100% { transform: translateY(-40px) rotate(360deg); }
+        }
+        
+        .jump {
+            animation: mario-jump 0.5s ease-out;
+        }
+        
+        @keyframes mario-jump {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-100px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .flash {
+            animation: flash 0.3s;
+        }
+        
+        @keyframes flash {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        /* 排行榜样式 */
+        .leaderboard {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            z-index: 30;
+            display: none;
+        }
+        
+        .leaderboard-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .leaderboard-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .close-leaderboard {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        /* 多人对战模式 */
+        .multiplayer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            z-index: 30;
+            display: none;
+        }
+        
+        .multiplayer-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .player-list {
+            margin-bottom: 20px;
+        }
+        
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .close-multiplayer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .battle-button {
+            padding: 10px;
+            margin: 5px 0;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        .battle-button:active {
+            background: #3e8e41;
+        }
+        
+        /* 皮肤商店 */
+        .skin-shop {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            z-index: 30;
+            display: none;
+        }
+        
+        .skin-shop-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .skin-items {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .skin-item {
+            background-color: #F5F5F5;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        
+        .skin-item:active {
+            transform: translateY(-2px);
+        }
+        
+        .skin-preview {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        .skin-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .skin-price {
+            color: #FF9800;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .close-skin-shop {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        /* 双倍金币提示 */
+        .double-notice {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background-color: rgba(255, 235, 59, 0.9);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 20;
+            animation: flash 1s infinite;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 400px) {
+            .question {
+                font-size: 1.2rem;
+            }
+            .option {
+                font-size: 1rem;
+                min-height: 40px;
+            }
+            .shop-items, .skin-items {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景元素 -->
+    <div class="cloud" style="width: 80px; height: 40px; top: 15%; left: 10%; animation-duration: 30s;"></div>
+    <div class="cloud" style="width: 120px; height: 60px; top: 25%; left: 50%; animation-duration: 40s;"></div>
+    <div class="cloud" style="width: 60px; height: 30px; top: 20%; left: 80%; animation-duration: 50s;"></div>
+    <div class="brick"></div>
+    <div class="pipe"></div>
+
+    <!-- 游戏主容器 -->
+    <div class="game-container">
+        <div class="ground"></div>
+        <div class="mario" id="mario"></div>
+        
+        <div class="question-box">
+            <div class="timer" id="timer">10秒</div>
+            <div class="question" id="question">3 × 4 = ?</div>
+            <div class="options" id="options">
+                <button class="option">12</button>
+                <button class="option">7</button>
+                <button class="option">15</button>
+                <button class="option">8</button>
+            </div>
+        </div>
+        
+        <div class="coins-display">
+            <div class="coin-icon"></div>
+            <span id="coins">0</span>
+        </div>
+        
+        <div class="double-notice" id="double-notice" style="display: none;">双倍金币生效中: <span id="double-count">5</span>题</div>
+        
+        <button class="shop-button" id="shop-button">商店</button>
+        <button class="shop-button" id="leaderboard-button" style="left: 100px;">排行榜</button>
+        <button class="shop-button" id="multiplayer-button" style="left: 180px;">对战</button>
+        <button class="shop-button" id="skin-shop-button" style="left: 260px;">皮肤</button>
+        
+        <!-- 道具商店 -->
+        <div class="shop" id="shop">
+            <button class="close-shop" id="close-shop">×</button>
+            <div class="shop-title">道具商店</div>
+            <div class="shop-items">
+                <div class="shop-item" data-item="time">
+                    <div class="item-name">+5秒</div>
+                    <div class="item-price">10金币</div>
+                </div>
+                <div class="shop-item" data-item="skip">
+                    <div class="item-name">跳过题目</div>
+                    <div class="item-price">15金币</div>
+                </div>
+                <div class="shop-item" data-item="hint">
+                    <div class="item-name">提示答案</div>
+                    <div class="item-price">20金币</div>
+                </div>
+                <div class="shop-item" data-item="double">
+                    <div class="item-name">双倍金币(5题)</div>
+                    <div class="item-price">30金币</div>
+                </div>
+                <div class="shop-item" data-item="freeze">
+                    <div class="item-name">冻结时间</div>
+                    <div class="item-price">25金币</div>
+                </div>
+                <div class="shop-item" data-item="auto">
+                    <div class="item-name">自动答题</div>
+                    <div class="item-price">40金币</div>
+                </div>
+                <div class="shop-item" data-item="steal">
+                    <div class="item-name">偷金币卡</div>
+                    <div class="item-price">50金币</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 排行榜 -->
+        <div class="leaderboard" id="leaderboard">
+            <button class="close-leaderboard" id="close-leaderboard">×</button>
+            <div class="leaderboard-title">排行榜</div>
+            <div class="leaderboard-list" id="leaderboard-list">
+                <!-- 排行榜内容将通过JS动态生成 -->
+            </div>
+        </div>
+        
+        <!-- 多人对战模式 -->
+        <div class="multiplayer" id="multiplayer">
+            <button class="close-multiplayer" id="close-multiplayer">×</button>
+            <div class="multiplayer-title">多人对战</div>
+            <div class="player-list" id="player-list">
+                <!-- 玩家列表内容将通过JS动态生成 -->
+            </div>
+            <button class="battle-button" id="start-battle">开始对战</button>
+            <button class="battle-button" id="steal-coins" style="background: #FF5722;">偷金币(需道具)</button>
+        </div>
+        
+        <!-- 皮肤商店 -->
+        <div class="skin-shop" id="skin-shop">
+            <button class="close-skin-shop" id="close-skin-shop">×</button>
+            <div class="skin-shop-title">皮肤商店</div>
+            <div class="skin-items">
+                <div class="skin-item" data-skin="0">
+                    <div class="skin-preview" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 80 100\"><rect x=\"30\" y=\"40\" width=\"20\" height=\"40\" fill=\"%23E52521\"/><rect x=\"20\" y=\"60\" width=\"40\" height=\"20\" fill=\"%2337A42A\"/><circle cx=\"40\" cy=\"30\" r=\"20\" fill=\"%23F7BD2F\"/></svg>')"></div>
+                    <div class="skin-name">经典马里奥</div>
+                    <div class="skin-price">已解锁</div>
+                </div>
+                <div class="skin-item" data-skin="1">
+                    <div class="skin-preview" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 80 100\"><rect x=\"30\" y=\"40\" width=\"20\" height=\"40\" fill=\"%233366FF\"/><rect x=\"20\" y=\"60\" width=\"40\" height=\"20\" fill=\"%23FF33CC\"/><circle cx=\"40\" cy=\"30\" r=\"20\" fill=\"%23FF9933\"/></svg>')"></div>
+                    <div class="skin-name">蓝色马里奥</div>
+                    <div class="skin-price">100金币</div>
+                </div>
+                <div class="skin-item" data-skin="2">
+                    <div class="skin-preview" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 80 100\"><rect x=\"30\" y=\"40\" width=\"20\" height=\"40\" fill=\"%2333CC33\"/><rect x=\"20\" y=\"60\" width=\"40\" height=\"20\" fill=\"%233333FF\"/><circle cx=\"40\" cy=\"30\" r=\"20\" fill=\"%23FF33FF\"/></svg>')"></div>
+                    <div class="skin-name">绿色马里奥</div>
+                    <div class="skin-price">200金币</div>
+                </div>
+                <div class="skin-item" data-skin="3">
+                    <div class="skin-preview" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 80 100\"><rect x=\"30\" y=\"40\" width=\"20\" height=\"40\" fill=\"%23FF33CC\"/><rect x=\"20\" y=\"60\" width=\"40\" height=\"20\" fill=\"%2333CCFF\"/><circle cx=\"40\" cy=\"30\" r=\"20\" fill=\"%23CCFF33\"/></svg>')"></div>
+                    <div class="skin-name">粉色马里奥</div>
+                    <div class="skin-price">300金币</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 音效 -->
+    <audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3" preload="auto"></audio>
+    <audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3" preload="auto"></audio>
+    <audio id="coin-sound" src="https://www.soundjay.com/buttons/sounds/button-21.mp3" preload="auto"></audio>
+    <audio id="shop-sound" src="https://www.soundjay.com/buttons/sounds/button-04.mp3" preload="auto"></audio>
+    <audio id="jump-sound" src="https://www.soundjay.com/buttons/sounds/button-21.mp3" preload="auto"></audio>
+    <audio id="battle-sound" src="https://www.soundjay.com/buttons/sounds/button-03.mp3" preload="auto"></audio>
+    <audio id="steal-sound" src="https://www.soundjay.com/buttons/sounds/button-22.mp3" preload="auto"></audio>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            coins: 0,
+            timeLeft: 10,
+            timerInterval: null,
+            currentQuestion: null,
+            doubleCoins: false,
+            doubleCoinsCount: 0,
+            timeAdded: false,
+            freezeTime: false,
+            autoAnswer: false,
+            currentSkin: 0,
+            unlockedSkins: [0], // 默认解锁经典马里奥皮肤
+            highScore: 0,
+            battleMode: false,
+            battleCoins: 0,
+            opponentCoins: 0,
+            battleInterval: null,
+            hasStealCard: false,
+            leaderboardData: []
+        };
+
+        // DOM元素
+        const elements = {
+            mario: document.getElementById('mario'),
+            timer: document.getElementById('timer'),
+            question: document.getElementById('question'),
+            options: document.getElementById('options'),
+            coinsDisplay: document.getElementById('coins'),
+            doubleNotice: document.getElementById('double-notice'),
+            doubleCount: document.getElementById('double-count'),
+            shopButton: document.getElementById('shop-button'),
+            shop: document.getElementById('shop'),
+            closeShop: document.getElementById('close-shop'),
+            shopItems: document.querySelectorAll('.shop-item'),
+            correctSound: document.getElementById('correct-sound'),
+            wrongSound: document.getElementById('wrong-sound'),
+            coinSound: document.getElementById('coin-sound'),
+            shopSound: document.getElementById('shop-sound'),
+            jumpSound: document.getElementById('jump-sound'),
+            leaderboardButton: document.getElementById('leaderboard-button'),
+            leaderboard: document.getElementById('leaderboard'),
+            closeLeaderboard: document.getElementById('close-leaderboard'),
+            leaderboardList: document.getElementById('leaderboard-list'),
+            multiplayerButton: document.getElementById('multiplayer-button'),
+            multiplayer: document.getElementById('multiplayer'),
+            closeMultiplayer: document.getElementById('close-multiplayer'),
+            playerList: document.getElementById('player-list'),
+            startBattle: document.getElementById('start-battle'),
+            stealCoins: document.getElementById('steal-coins'),
+            skinShopButton: document.getElementById('skin-shop-button'),
+            skinShop: document.getElementById('skin-shop'),
+            closeSkinShop: document.getElementById('close-skin-shop'),
+            skinItems: document.querySelectorAll('.skin-item'),
+            battleSound: document.getElementById('battle-sound'),
+            stealSound: document.getElementById('steal-sound')
+        };
+
+        // 初始化游戏
+        function initGame() {
+            // 从本地存储加载游戏数据
+            loadGameData();
+            
+            updateCoinsDisplay();
+            generateQuestion();
+            startTimer();
+            
+            // 事件监听器
+            elements.shopButton.addEventListener('click', openShop);
+            elements.closeShop.addEventListener('click', closeShop);
+            
+            elements.shopItems.forEach(item => {
+                item.addEventListener('click', () => buyItem(item.dataset.item));
+            });
+            
+            elements.leaderboardButton.addEventListener('click', openLeaderboard);
+            elements.closeLeaderboard.addEventListener('click', closeLeaderboard);
+            
+            elements.multiplayerButton.addEventListener('click', openMultiplayer);
+            elements.closeMultiplayer.addEventListener('click', closeMultiplayer);
+            elements.startBattle.addEventListener('click', startBattle);
+            elements.stealCoins.addEventListener('click', stealOpponentCoins);
+            
+            elements.skinShopButton.addEventListener('click', openSkinShop);
+            elements.closeSkinShop.addEventListener('click', closeSkinShop);
+            
+            elements.skinItems.forEach(item => {
+                item.addEventListener('click', () => buySkin(parseInt(item.dataset.skin)));
+            });
+            
+            // 应用当前皮肤
+            applySkin();
+            
+            // 如果是自动答题模式，自动选择正确答案
+            if (gameState.autoAnswer) {
+                autoAnswerQuestion();
+            }
+            
+            // 初始化排行榜数据
+            initLeaderboard();
+        }
+
+        // 从本地存储加载游戏数据
+        function loadGameData() {
+            const savedData = localStorage.getItem('marioMathGameData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                gameState.coins = data.coins || 0;
+                gameState.unlockedSkins = data.unlockedSkins || [0];
+                gameState.currentSkin = data.currentSkin || 0;
+                gameState.highScore = data.highScore || 0;
+                gameState.leaderboardData = data.leaderboardData || [];
+            }
+        }
+
+        // 保存游戏数据到本地存储
+        function saveGameData() {
+            // 更新排行榜
+            updateLeaderboard();
+            
+            const data = {
+                coins: gameState.coins,
+                unlockedSkins: gameState.unlockedSkins,
+                currentSkin: gameState.currentSkin,
+                highScore: gameState.highScore,
+                leaderboardData: gameState.leaderboardData
+            };
+            localStorage.setItem('marioMathGameData', JSON.stringify(data));
+        }
+
+        // 初始化排行榜
+        function initLeaderboard() {
+            if (gameState.leaderboardData.length === 0) {
+                // 默认排行榜数据
+                gameState.leaderboardData = [
+                    { name: "数学小天才", score: 350, date: getCurrentDate() },
+                    { name: "乘法达人", score: 280, date: getCurrentDate() },
+                    { name: "金币收藏家", score: 200, date: getCurrentDate() },
+                    { name: "新手玩家", score: 120, date: getCurrentDate() }
+                ];
+            }
+        }
+
+        // 更新排行榜
+        function updateLeaderboard() {
+            // 检查是否需要将当前玩家加入排行榜
+            if (gameState.coins > 50) { // 只有获得一定分数才能上榜
+                let playerIndex = -1;
+                
+                // 检查是否已经在排行榜中
+                for (let i = 0; i < gameState.leaderboardData.length; i++) {
+                    if (gameState.leaderboardData[i].name === "你") {
+                        playerIndex = i;
+                        break;
+                    }
+                }
+                
+                if (playerIndex !== -1) {
+                    // 更新现有记录
+                    if (gameState.coins > gameState.leaderboardData[playerIndex].score) {
+                        gameState.leaderboardData[playerIndex].score = gameState.coins;
+                        gameState.leaderboardData[playerIndex].date = getCurrentDate();
+                    }
+                } else {
+                    // 添加新记录
+                    gameState.leaderboardData.push({
+                        name: "你",
+                        score: gameState.coins,
+                        date: getCurrentDate()
+                    });
+                }
+                
+                // 按分数排序
+                gameState.leaderboardData.sort((a, b) => b.score - a.score);
+                
+                // 只保留前10名
+                if (gameState.leaderboardData.length > 10) {
+                    gameState.leaderboardData = gameState.leaderboardData.slice(0, 10);
+                }
+            }
+        }
+
+        // 获取当前日期
+        function getCurrentDate() {
+            const now = new Date();
+            return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+        }
+
+        // 生成乘法题目
+        function generateQuestion() {
+            // 更新双倍金币计数
+            if (gameState.doubleCoins) {
+                gameState.doubleCoinsCount--;
+                elements.doubleCount.textContent = gameState.doubleCoinsCount;
+                
+                if (gameState.doubleCoinsCount <= 0) {
+                    gameState.doubleCoins = false;
+                    elements.doubleNotice.style.display = 'none';
+                }
+            }
+            
+            const num1 = Math.floor(Math.random() * 9) + 1;
+            const num2 = Math.floor(Math.random() * 9) + 1;
+            const answer = num1 * num2;
+            
+            gameState.currentQuestion = {
+                num1,
+                num2,
+                answer
+            };
+            
+            elements.question.textContent = `${num1} × ${num2} = ?`;
+            
+            // 生成选项
+            const options = [answer];
+            while (options.length < 4) {
+                const wrongAnswer = Math.floor(Math.random() * 81) + 1;
+                if (!options.includes(wrongAnswer)) {
+                    options.push(wrongAnswer);
+                }
+            }
+            
+            // 打乱选项顺序
+            shuffleArray(options);
+            
+            // 更新选项按钮
+            const optionButtons = elements.options.querySelectorAll('.option');
+            optionButtons.forEach((button, index) => {
+                button.textContent = options[index];
+                button.onclick = () => checkAnswer(parseInt(options[index]));
+                button.style.backgroundColor = '#FF5252';
+                button.style.boxShadow = '0 3px 0 #C62828';
+            });
+            
+            // 重置状态
+            gameState.timeAdded = false;
+            gameState.freezeTime = false;
+            
+            // 如果是自动答题模式，自动选择正确答案
+            if (gameState.autoAnswer) {
+                setTimeout(autoAnswerQuestion, 500);
+            }
+        }
+
+        // 自动答题
+        function autoAnswerQuestion() {
+            const correctAnswer = gameState.currentQuestion.answer;
+            const optionButtons = elements.options.querySelectorAll('.option');
+            
+            optionButtons.forEach(button => {
+                if (parseInt(button.textContent) === correctAnswer) {
+                    button.click();
+                }
+            });
+            
+            // 使用后重置
+            gameState.autoAnswer = false;
+        }
+
+        // 检查答案
+        function checkAnswer(selectedAnswer) {
+            clearInterval(gameState.timerInterval);
+            
+            if (selectedAnswer === gameState.currentQuestion.answer) {
+                // 回答正确
+                playSound(elements.correctSound);
+                playSound(elements.jumpSound);
+                elements.mario.classList.add('jump');
+                setTimeout(() => elements.mario.classList.remove('jump'), 500);
+                
+                // 计算奖励金币
+                let reward = 5;
+                if (gameState.doubleCoins) reward *= 2;
+                if (gameState.battleMode) reward *= 2; // 对战模式双倍金币
+                
+                // 添加金币
+                gameState.coins += reward;
+                if (gameState.battleMode) {
+                    gameState.battleCoins += reward;
+                }
+                
+                updateCoinsDisplay();
+                
+                // 更新最高分
+                if (gameState.coins > gameState.highScore) {
+                    gameState.highScore = gameState.coins;
+                }
+                
+                // 保存游戏数据
+                saveGameData();
+                
+                // 爆金币效果
+                createCoins();
+            } else {
+                // 回答错误
+                playSound(elements.wrongSound);
+                elements.question.classList.add('shake');
+                setTimeout(() => elements.question.classList.remove('shake'), 500);
+                
+                if (gameState.battleMode) {
+                    // 对战模式下，对手获得金币
+                    const opponentGain = Math.floor(Math.random() * 3) + 1;
+                    gameState.opponentCoins += opponentGain;
+                    updateBattleDisplay();
+                    
+                    // 显示对手获得金币提示
+                    const notice = document.createElement('div');
+                    notice.textContent = `对手获得了${opponentGain}金币!`;
+                    notice.style.position = 'absolute';
+                    notice.style.top = '50%';
+                    notice.style.left = '50%';
+                    notice.style.transform = 'translate(-50%, -50%)';
+                    notice.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    notice.style.color = 'white';
+                    notice.style.padding = '10px';
+                    notice.style.borderRadius = '5px';
+                    notice.style.zIndex = '100';
+                    document.querySelector('.game-container').appendChild(notice);
+                    
+                    setTimeout(() => {
+                        notice.remove();
+                    }, 1500);
+                }
+            }
+            
+            // 下一题
+            setTimeout(() => {
+                resetTimer();
+                generateQuestion();
+            }, 1500);
+        }
+
+        // 播放音效
+        function playSound(audioElement) {
+            audioElement.currentTime = 0;
+            audioElement.play().catch(e => console.log('音频播放失败:', e));
+        }
+
+        // 创建金币爆炸效果
+        function createCoins() {
+            playSound(elements.coinSound);
+            
+            const container = document.querySelector('.game-container');
+            const containerRect = container.getBoundingClientRect();
+            
+            for (let i = 0; i < 10; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'coin';
+                
+                // 随机位置
+                const startX = 50 + Math.random() * (containerRect.width - 100);
+                const startY = containerRect.height * 0.7;
+                
+                coin.style.left = `${startX}px`;
+                coin.style.top = `${startY}px`;
+                
+                container.appendChild(coin);
+                
+                // 随机动画
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 100;
+                const duration = 1000 + Math.random() * 500;
+                
+                const animation = coin.animate([
+                    { 
+                        transform: `translate(0, 0) rotate(0deg)`,
+                        opacity: 1 
+                    },
+                    { 
+                        transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance - 100}px) rotate(360deg)`,
+                        opacity: 0 
+                    }
+                ], {
+                    duration,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
+                });
+                
+                animation.onfinish = () => coin.remove();
+            }
+        }
+
+        // 计时器功能
+        function startTimer() {
+            gameState.timeLeft = 10;
+            updateTimerDisplay();
+            
+            if (!gameState.freezeTime) {
+                gameState.timerInterval = setInterval(() => {
+                    if (!gameState.freezeTime) {
+                        gameState.timeLeft--;
+                        updateTimerDisplay();
+                        
+                        if (gameState.timeLeft <= 0) {
+                            clearInterval(gameState.timerInterval);
+                            timeUp();
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(gameState.timerInterval);
+            startTimer();
+        }
+
+        function updateTimerDisplay() {
+            elements.timer.textContent = `${gameState.timeLeft}秒`;
+            
+            if (gameState.timeLeft <= 3) {
+                elements.timer.style.color = 'red';
+                elements.timer.classList.add('flash');
+            } else {
+                elements.timer.style.color = '#333';
+                elements.timer.classList.remove('flash');
+            }
+        }
+
+        function timeUp() {
+            playSound(elements.wrongSound);
+            elements.question.classList.add('shake');
+            setTimeout(() => elements.question.classList.remove('shake'), 500);
+            
+            if (gameState.battleMode) {
+                // 对战模式下，对手获得金币
+                const opponentGain = Math.floor(Math.random() * 5) + 3;
+                gameState.opponentCoins += opponentGain;
+                updateBattleDisplay();
+                
+                // 显示对手获得金币提示
+                const notice = document.createElement('div');
+                notice.textContent = `时间到! 对手获得了${opponentGain}金币!`;
+                notice.style.position = 'absolute';
+                notice.style.top = '50%';
+                notice.style.left = '50%';
+                notice.style.transform = 'translate(-50%, -50%)';
+                notice.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                notice.style.color = 'white';
+                notice.style.padding = '10px';
+                notice.style.borderRadius = '5px';
+                notice.style.zIndex = '100';
+                document.querySelector('.game-container').appendChild(notice);
+                
+                setTimeout(() => {
+                    notice.remove();
+                }, 1500);
+            }
+            
+            setTimeout(() => {
+                resetTimer();
+                generateQuestion();
+            }, 1500);
+        }
+
+        // 商店功能
+        function openShop() {
+            playSound(elements.shopSound);
+            elements.shop.style.display = 'block';
+            clearInterval(gameState.timerInterval);
+        }
+
+        function closeShop() {
+            elements.shop.style.display = 'none';
+            resetTimer();
+        }
+
+        function buyItem(item) {
+            let price = 0;
+            let canBuy = false;
+            
+            switch (item) {
+                case 'time':
+                    price = 10;
+                    if (gameState.coins >= price && !gameState.timeAdded) {
+                        gameState.coins -= price;
+                        gameState.timeLeft += 5;
+                        updateTimerDisplay();
+                        gameState.timeAdded = true;
+                        canBuy = true;
+                    }
+                    break;
+                case 'skip':
+                    price = 15;
+                    if (gameState.coins >= price) {
+                        gameState.coins -= price;
+                        canBuy = true;
+                        setTimeout(() => {
+                            resetTimer();
+                            generateQuestion();
+                        }, 500);
+                    }
+                    break;
+                case 'hint':
+                    price = 20;
+                    if (gameState.coins >= price) {
+                        gameState.coins -= price;
+                        canBuy = true;
+                        
+                        // 高亮显示正确答案
+                        const options = elements.options.querySelectorAll('.option');
+                        options.forEach(button => {
+                            if (parseInt(button.textContent) === gameState.currentQuestion.answer) {
+                                button.style.backgroundColor = '#4CAF50';
+                                button.style.boxShadow = '0 3px 0 #2E7D32';
+                            }
+                        });
+                    }
+                    break;
+                case 'double':
+                    price = 30;
+                    if (gameState.coins >= price) {
+                        gameState.coins -= price;
+                        gameState.doubleCoins = true;
+                        gameState.doubleCoinsCount = 5;
+                        elements.doubleNotice.style.display = 'block';
+                        elements.doubleCount.textContent = '5';
+                        canBuy = true;
+                    }
+                    break;
+                case 'freeze':
+                    price = 25;
+                    if (gameState.coins >= price) {
+                        gameState.coins -= price;
+                        gameState.freezeTime = true;
+                        canBuy = true;
+                        elements.timer.textContent = "时间冻结!";
+                        elements.timer.style.color = "#2196F3";
+                    }
+                    break;
+                case 'auto':
+                    price = 40;
+                    if (gameState.coins >= price) {
+                        gameState.coins -= price;
+                        gameState.autoAnswer = true;
+                        canBuy = true;
+                    }
+                    break;
+                case 'steal':
+                    price = 50;
+                    if (gameState.coins >= price) {
+                        gameState.coins -= price;
+                        gameState.hasStealCard = true;
+                        canBuy = true;
+                    }
+                    break;
+            }
+            
+            if (canBuy) {
+                playSound(elements.coinSound);
+                updateCoinsDisplay();
+                
+                // 保存游戏数据
+                saveGameData();
+                
+                // 购买特效
+                const itemElement = document.querySelector(`.shop-item[data-item="${item}"]`);
+                itemElement.classList.add('flash');
+                setTimeout(() => itemElement.classList.remove('flash'), 300);
+                
+                // 关闭商店
+                setTimeout(closeShop, 500);
+            } else {
+                playSound(elements.wrongSound);
+                elements.coinsDisplay.classList.add('shake');
+                setTimeout(() => elements.coinsDisplay.classList.remove('shake'), 500);
+            }
+        }
+
+        // 排行榜功能
+        function openLeaderboard() {
+            elements.leaderboard.style.display = 'block';
+            clearInterval(gameState.timerInterval);
+            
+            // 更新排行榜显示
+            elements.leaderboardList.innerHTML = '';
+            gameState.leaderboardData.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <span>${index + 1}. ${player.name}</span>
+                    <span>${player.score}金币 (${player.date})</span>
+                `;
+                if (player.name === "你") {
+                    item.style.fontWeight = 'bold';
+                    item.style.color = '#E91E63';
+                }
+                elements.leaderboardList.appendChild(item);
+            });
+        }
+
+        function closeLeaderboard() {
+            elements.leaderboard.style.display = 'none';
+            resetTimer();
+        }
+
+        // 多人对战模式
+        function openMultiplayer() {
+            playSound(elements.battleSound);
+            elements.multiplayer.style.display = 'block';
+            clearInterval(gameState.timerInterval);
+            
+            // 更新偷金币按钮状态
+            elements.stealCoins.disabled = !gameState.hasStealCard;
+            elements.stealCoins.style.opacity = gameState.hasStealCard ? '1' : '0.5';
+            
+            // 如果不是对战模式，重置对战状态
+            if (!gameState.battleMode) {
+                gameState.battleCoins = 0;
+                gameState.opponentCoins = 0;
+            }
+            
+            // 更新玩家列表显示
+            updateBattleDisplay();
+        }
+
+        function closeMultiplayer() {
+            elements.multiplayer.style.display = 'none';
+            
+            // 如果对战正在进行，结束对战
+            if (gameState.battleMode) {
+                endBattle();
+            } else {
+                resetTimer();
+            }
+        }
+
+        function updateBattleDisplay() {
+            elements.playerList.innerHTML = `
+                <div class="player-item">
+                    <span>你</span>
+                    <span>${gameState.battleCoins}金币</span>
+                </div>
+                <div class="player-item">
+                    <span>对手</span>
+                    <span>${gameState.opponentCoins}金币</span>
+                </div>
+            `;
+        }
+
+        function startBattle() {
+            playSound(elements.battleSound);
+            gameState.battleMode = true;
+            gameState.battleCoins = 0;
+            gameState.opponentCoins = 0;
+            
+            // 隐藏开始按钮
+            elements.startBattle.style.display = 'none';
+            
+            // 更新显示
+            updateBattleDisplay();
+            
+            // 开始对战计时器
+            gameState.battleInterval = setInterval(() => {
+                // 对手随机获得金币
+                if (Math.random() > 0.7) {
+                    const opponentGain = Math.floor(Math.random() * 3) + 1;
+                    gameState.opponentCoins += opponentGain;
+                    updateBattleDisplay();
+                    
+                    // 显示对手获得金币提示
+                    const notice = document.createElement('div');
+                    notice.textContent = `对手获得了${opponentGain}金币!`;
+                    notice.style.position = 'absolute';
+                    notice.style.top = '50%';
+                    notice.style.left = '50%';
+                    notice.style.transform = 'translate(-50%, -50%)';
+                    notice.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    notice.style.color = 'white';
+                    notice.style.padding = '10px';
+                    notice.style.borderRadius = '5px';
+                    notice.style.zIndex = '100';
+                    document.querySelector('.game-container').appendChild(notice);
+                    
+                    setTimeout(() => {
+                        notice.remove();
+                    }, 1500);
+                }
+            }, 3000); // 每3秒检查一次
+            
+            // 关闭多人对战界面，开始游戏
+            closeMultiplayer();
+            resetTimer();
+        }
+
+        // 偷对手金币
+        function stealOpponentCoins() {
+            if (!gameState.hasStealCard || !gameState.battleMode || gameState.opponentCoins <= 0) {
+                playSound(elements.wrongSound);
+                return;
+            }
+            
+            // 计算可以偷取的金币数量 (1-5个或对手金币的一半，取较小值)
+            const stealAmount = Math.min(
+                Math.max(1, Math.floor(gameState.opponentCoins * 0.5)),
+                Math.floor(Math.random() * 5) + 1
+            );
+            
+            gameState.opponentCoins -= stealAmount;
+            gameState.battleCoins += stealAmount;
+            
+            // 使用偷金币卡
+            gameState.hasStealCard = false;
+            elements.stealCoins.disabled = true;
+            elements.stealCoins.style.opacity = '0.5';
+            
+            // 播放音效
+            playSound(elements.stealSound);
+            
+            // 更新显示
+            updateBattleDisplay();
+            
+            // 显示偷取金币提示
+            const notice = document.createElement('div');
+            notice.textContent = `你偷取了${stealAmount}金币!`;
+            notice.style.position = 'absolute';
+            notice.style.top = '50%';
+            notice.style.left = '50%';
+            notice.style.transform = 'translate(-50%, -50%)';
+            notice.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            notice.style.color = 'gold';
+            notice.style.padding = '10px';
+            notice.style.borderRadius = '5px';
+            notice.style.zIndex = '100';
+            document.querySelector('.game-container').appendChild(notice);
+            
+            setTimeout(() => {
+                notice.remove();
+            }, 1500);
+        }
+
+        function endBattle() {
+            clearInterval(gameState.battleInterval);
+            gameState.battleMode = false;
+            
+            // 计算对战结果
+            let resultMessage = "";
+            if (gameState.battleCoins > gameState.opponentCoins) {
+                resultMessage = `你赢了! 获得${gameState.battleCoins}金币`;
+                gameState.coins += gameState.battleCoins;
+            } else if (gameState.battleCoins < gameState.opponentCoins) {
+                resultMessage = `你输了! 对手获得${gameState.opponentCoins}金币`;
+            } else {
+                resultMessage = "平局!";
+            }
+            
+            // 显示结果
+            alert(resultMessage);
+            
+            // 更新金币显示
+            updateCoinsDisplay();
+            saveGameData();
+            
+            // 重置开始按钮
+            elements.startBattle.style.display = 'block';
+        }
+
+        // 皮肤商店功能
+        function openSkinShop() {
+            playSound(elements.shopSound);
+            elements.skinShop.style.display = 'block';
+            clearInterval(gameState.timerInterval);
+            
+            // 更新皮肤商店显示
+            elements.skinItems.forEach(item => {
+                const skinId = parseInt(item.dataset.skin);
+                const priceElement = item.querySelector('.skin-price');
+                
+                if (gameState.unlockedSkins.includes(skinId)) {
+                    if (skinId === gameState.currentSkin) {
+                        priceElement.textContent = "使用中";
+                        priceElement.style.color = "#4CAF50";
+                    } else {
+                        priceElement.textContent = "已解锁";
+                        priceElement.style.color = "#4CAF50";
+                    }
+                } else {
+                    // 设置皮肤价格
+                    const prices = [0, 100, 200, 300];
+                    priceElement.textContent = `${prices[skinId]}金币`;
+                    priceElement.style.color = "#FF9800";
+                }
+            });
+        }
+
+        function closeSkinShop() {
+            elements.skinShop.style.display = 'none';
+            resetTimer();
+        }
+
+        function buySkin(skinId) {
+            // 如果皮肤已解锁
+            if (gameState.unlockedSkins.includes(skinId)) {
+                // 直接应用皮肤
+                gameState.currentSkin = skinId;
+                applySkin();
+                closeSkinShop();
+                
+                // 保存游戏数据
+                saveGameData();
+                
+                // 更新显示
+                openSkinShop();
+                return;
+            }
+            
+            // 检查是否有足够金币购买皮肤
+            const prices = [0, 100, 200, 300];
+            const price = prices[skinId];
+            
+            if (gameState.coins >= price) {
+                gameState.coins -= price;
+                gameState.unlockedSkins.push(skinId);
+                gameState.currentSkin = skinId;
+                
+                // 保存游戏数据
+                saveGameData();
+                
+                // 应用皮肤
+                applySkin();
+                
+                // 更新金币显示
+                updateCoinsDisplay();
+                
+                // 播放音效
+                playSound(elements.coinSound);
+                
+                // 更新皮肤商店显示
+                openSkinShop();
+            } else {
+                playSound(elements.wrongSound);
+                elements.coinsDisplay.classList.add('shake');
+                setTimeout(() => elements.coinsDisplay.classList.remove('shake'), 500);
+            }
+        }
+
+        function applySkin() {
+            // 移除所有皮肤类
+            elements.mario.className = 'mario';
+            
+            // 添加当前皮肤类
+            if (gameState.currentSkin > 0) {
+                elements.mario.classList.add(`mario-skin-${gameState.currentSkin}`);
+            }
+        }
+
+        // 更新金币显示
+        function updateCoinsDisplay() {
+            if (gameState.battleMode) {
+                elements.coinsDisplay.textContent = `${gameState.coins} (对战: ${gameState.battleCoins})`;
+            } else {
+                elements.coinsDisplay.textContent = gameState.coins;
+            }
+            
+            // 动画效果
+            elements.coinsDisplay.classList.add('flash');
+            setTimeout(() => elements.coinsDisplay.classList.remove('flash'), 200);
+        }
+
+        // 辅助函数
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 启动游戏
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
